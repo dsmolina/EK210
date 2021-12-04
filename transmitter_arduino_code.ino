@@ -1,31 +1,43 @@
 //Transmitter
 #include <VirtualWire.h>
-uint8_t buf[VW_MAX_MESSAGE_LEN];
-uint8_t buflen = VW_MAX_MESSAGE_LEN;
-const char *on2 = "a";
-const char *off2 = "b";
-int button = 8;
-const int transmit_pin = 12;
 
 
+// constants won't change. They're used here to set pin numbers:
+const int buttonPin = 2;     // the number of the pushbutton pin
+const int ledPin =  13;      // the number of the LED pin
+// variables will change:
+int buttonState = 0;         // variable for reading the pushbutton status
+
+//tilt sensor
+const int tiltPin = 3;
 
 void setup() {
-  vw_set_tx_pin(transmit_pin);
-  vw_set_ptt_inverted(true); //required for rf link modules
-  vw_setup(300); //set data speed
-  vw_set_tx_pin(12);
-  pinMode(button,INPUT);
+    Serial.begin(9600);
+    vw_set_tx_pin(12);          // Sets pin D12 as the TX pin
+    vw_setup(2000);          // Bits per sec
+    // initialize the LED pin as an output:
+  pinMode(ledPin, OUTPUT);
+  // initialize the pushbutton pin as an input:
+  pinMode(buttonPin, INPUT);
+  pinMode(tiltPin, INPUT);
  }
 
 void loop() {
-  if (digitalRead(button) == HIGH){
-    vw_send((uint8_t *)on2, strlen(on2)); // send the data out to the world
-    vw_wait_tx(); // wait a moment
+   // read the state of the pushbutton value:
+  buttonState = digitalRead(buttonPin);
+  int TiltSensorValue = digitalRead(tiltPin);
+  // check if the tilt sensor position has tilted, if so, light LED and transmit data
+    bool TiltSwitchVal = digitalRead(tiltPin);
+    Serial.print(F("Val: ")); 
+    Serial.println(TiltSwitchVal);
+  if (TiltSensorValue == LOW) {
+    // turn LED on:
+    digitalWrite(ledPin, HIGH);
+    vw_send((uint8_t *)&TiltSwitchVal,1); //transmits the data
+    vw_wait_tx(); // Wait until the whole message is gone
     delay(200);
-  }
-  if (digitalRead(button)==LOW){
-    vw_send((uint8_t *)off2, strlen(off2));
-    vw_wait_tx();
-    delay(200);
+  } else {
+    // turn LED off:
+    digitalWrite(ledPin, LOW);
   }
 }

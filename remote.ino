@@ -1,34 +1,64 @@
 
 //https://create.arduino.cc/projecthub/Raushancpr/servo-motor-control-with-remote-fd6d95
-/*The IR sensor's pins are attached to Arduino as so:Pin 1 to Vout (pin 11 on Arduino)Pin 2 to GNDPin 3 to Vcc (+5v from Arduino)*/#include <IRremote.h>int IRpin = 11;IRrecv irrecv(IRpin);decode_results results;void setup(){Serial.begin(9600); irrecv.enableIRIn(); // Start the receiver}void loop() { if (irrecv.decode(&results))    {     Serial.println(results.value, DEC); // Print the Serial 'results.value'     irrecv.resume();   // Receive the next value   }}
+
 
 #include <IRremote.h>
-#include <Servo.h>
 int IRpin = 11;  // pin for the IR sensor
 IRrecv irrecv(IRpin);
 decode_results results;
-Servo myservo;
+int ledPin = 13;
+
+
+//code from Lin
+//#include <LowPower.h>
+int sensePin = A0;  
+int sensorInput;    
+double temp;        
+const int hot = 40; //This is the highest temperature
+const int cold = -23; //This is the lowest temperature
+unsigned long previousMillis = 0;
+int solenoidpin = 3;
+unsigned long interval = (unsigned long) 1000 * 60; //24 hours time interval in ms
 void setup()
 {
  Serial.begin(9600);
  irrecv.enableIRIn(); // Start the receiver
- myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+ pinMode(ledPin,OUTPUT);
+ pinMode(solenoidpin, OUTPUT);
+ 
 }
 void loop() 
 {
- if (irrecv.decode(&results)) 
+
+  sensorInput = analogRead(A0);        //read the analog sensor and store it
+  temp = (double)sensorInput / 1024;   
+  temp = temp * 5;                     
+  temp = temp - 0.5;                   
+  temp = temp * 100;        // Temperature in celsius
+  unsigned long currentMillis = millis(); //Get the current time in ms
+
+  Serial.print("Current Temperature in celsius: ");
+  Serial.println(temp);
+
+ if (temp <= cold || temp >= hot || currentMillis - previousMillis >= interval )
+ //|| irrecv.decode()) 
    {
+    digitalWrite(solenoidpin, HIGH);
      irrecv.resume();   // Receive the next value
+     digitalWrite(ledPin,HIGH);
+      previousMillis = currentMillis; //Timer will reset because the rats were released at one particular circumstance, the amount of time passed is now zero.
+       delay(1000);  
+       //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF); //Sleep for 8 seconds to lower the battery comsumption
+       delay(100000);
+       digitalWrite(solenoidpin,LOW); 
+       exit(0); 
    }
-  if (results.value == 33441975)  // change according to your IR remote button number
-    {
-      myservo.write(0);
-      delay(15);
-    }
-    if (results.value == 33446055)  // change according  to your IR remote button number
-    {
-      myservo.write(30);
-    delay(15);
-    }
-    
+  else
+  {
+  digitalWrite(ledPin, LOW);
+  digitalWrite(solenoidpin,LOW);
+  //LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF); 
+  delay(1000);  
+  }
+ delay(200);
 }     
