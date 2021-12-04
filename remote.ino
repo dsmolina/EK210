@@ -8,8 +8,6 @@ IRrecv irrecv(IRpin);
 decode_results results;
 int ledPin = 13;
 
-
-//code from Lin
 //#include <LowPower.h>
 int sensePin = A0;  
 int sensorInput;    
@@ -18,7 +16,7 @@ const int hot = 40; //This is the highest temperature
 const int cold = -23; //This is the lowest temperature
 unsigned long previousMillis = 0;
 int solenoidpin = 3;
-unsigned long interval = (unsigned long) 1000 * 60; //24 hours time interval in ms
+unsigned long interval = (unsigned long) 1000 * 60; //24 hours time interval would be 1000*60*60*24, this is a minute
 void setup()
 {
  Serial.begin(9600);
@@ -40,8 +38,8 @@ void loop()
   Serial.print("Current Temperature in celsius: ");
   Serial.println(temp);
 
- if (temp <= cold || temp >= hot || currentMillis - previousMillis >= interval )
- //|| irrecv.decode()) 
+ if (temp <= cold || temp >= hot || currentMillis - previousMillis >= interval  || irrecv.decode())
+ 
    {
     digitalWrite(solenoidpin, HIGH);
      irrecv.resume();   // Receive the next value
