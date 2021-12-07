@@ -23,8 +23,7 @@ const int hot = 40; //This is the highest temperature
 const int cold = -23; //This is the lowest temperature
 unsigned long previousMillis = 0;
 int solenoidpin = 3;
-unsigned long interval = (unsigned long) 1000 * 60; //24 hours time interval would be 1000*60*60*24, this is a minute
-
+unsigned long interval = (unsigned long) 1000*60*60*24; //24 hours time interval
 
 void setup() {
     Serial.begin(9600);
