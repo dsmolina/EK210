@@ -1,3 +1,3 @@
 # EK210
 Smart Rodent Trap
-For our EK210 class, we made a Smart Rodent Trap. This is our arduino code.
+EK210 Arduino Code for Smart Rodent Trap Fall 2021
